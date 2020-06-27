@@ -1,25 +1,21 @@
-package net.growdev.mynotesapp_kotlin
+package net.growdev.consumerapp
 
-import android.content.ContentProvider
 import android.content.ContentValues
-import android.content.Intent
 import android.net.Uri
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.app.AppCompatActivity
 import kotlinx.android.synthetic.main.activity_note_add_update.*
-import net.growdev.mynotesapp_kotlin.db.DatabaseContract
-import net.growdev.mynotesapp_kotlin.db.DatabaseContract.NoteColumns.Companion.CONTENT_URI
-import net.growdev.mynotesapp_kotlin.db.DatabaseContract.NoteColumns.Companion.DATE
-import net.growdev.mynotesapp_kotlin.db.DatabaseContract.NoteColumns.Companion.DESCRIPTION
-import net.growdev.mynotesapp_kotlin.db.DatabaseContract.NoteColumns.Companion.TITLE
-import net.growdev.mynotesapp_kotlin.db.NoteHelper
-import net.growdev.mynotesapp_kotlin.entity.Note
-import net.growdev.mynotesapp_kotlin.helper.MappingHelper
+import net.growdev.consumerapp.db.DatabaseContract.NoteColumns.Companion.CONTENT_URI
+import net.growdev.consumerapp.db.DatabaseContract.NoteColumns.Companion.DATE
+import net.growdev.consumerapp.db.DatabaseContract.NoteColumns.Companion.DESCRIPTION
+import net.growdev.consumerapp.db.DatabaseContract.NoteColumns.Companion.TITLE
+import net.growdev.consumerapp.entity.Note
+import net.growdev.consumerapp.helper.MappingHelper
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -47,7 +43,7 @@ class NoteAddUpdateActivity : AppCompatActivity(), View.OnClickListener {
         setContentView(R.layout.activity_note_add_update)
 
         note = intent.getParcelableExtra(EXTRA_NOTE)
-        if (note != null){
+        if (note != null) {
             position = intent.getIntExtra(EXTRA_POSITION, 0)
             isEdit = true
         } else {
@@ -57,7 +53,7 @@ class NoteAddUpdateActivity : AppCompatActivity(), View.OnClickListener {
         val actionBarTitle: String
         val btnTitle: String
 
-        if (isEdit){
+        if (isEdit) {
 
             // Uri yang di dapatkan disini akan digunakan untuk ambil data dari provider
             // content://net.growdev.mynotesapp_kotlin/note/id
@@ -65,7 +61,7 @@ class NoteAddUpdateActivity : AppCompatActivity(), View.OnClickListener {
             uriWithId = Uri.parse(CONTENT_URI.toString() + "/" + note?.id)
 
             val cursor = contentResolver.query(uriWithId, null, null, null, null)
-            if (cursor != null){
+            if (cursor != null) {
                 note = MappingHelper.mapCursorToObject(cursor)
                 cursor.close()
             }
@@ -73,7 +69,7 @@ class NoteAddUpdateActivity : AppCompatActivity(), View.OnClickListener {
             actionBarTitle = "Ubah"
             btnTitle = "Update"
 
-            note?.let{
+            note?.let {
                 edt_title.setText(it.title)
                 edt_description.setText(it.description)
             }
@@ -90,11 +86,11 @@ class NoteAddUpdateActivity : AppCompatActivity(), View.OnClickListener {
     }
 
     override fun onClick(view: View) {
-        if (view.id == R.id.btn_submit){
+        if (view.id == R.id.btn_submit) {
             val title = edt_title.text.toString().trim()
             val description = edt_description.text.toString().trim()
 
-            if (title.isEmpty()){
+            if (title.isEmpty()) {
                 edt_title.error = "Field can not be blank"
                 return
             }
@@ -103,7 +99,7 @@ class NoteAddUpdateActivity : AppCompatActivity(), View.OnClickListener {
             values.put(TITLE, title)
             values.put(DESCRIPTION, description)
 
-            if (isEdit){
+            if (isEdit) {
                 // Gunakan uriWithId untuk update
                 // content://net.growdev.mynotesapp_kotlin/note/id
 
@@ -111,7 +107,7 @@ class NoteAddUpdateActivity : AppCompatActivity(), View.OnClickListener {
                 Toast.makeText(this, "Satu item berhasil diedit", Toast.LENGTH_SHORT).show()
                 finish()
             } else {
-               values.put(DATE, getCurrentDate())
+                values.put(DATE, getCurrentDate())
                 // Gunakan content uri untuk insert
                 // content://net.growdev.mynotesapp_kotlin/note/
                 contentResolver.insert(CONTENT_URI, values)
@@ -121,7 +117,7 @@ class NoteAddUpdateActivity : AppCompatActivity(), View.OnClickListener {
         }
     }
 
-    private fun getCurrentDate(): String{
+    private fun getCurrentDate(): String {
         val dateFormat = SimpleDateFormat("yyyy/MM/dd HH:mm:ss", Locale.getDefault())
         val date = Date()
 
@@ -129,7 +125,7 @@ class NoteAddUpdateActivity : AppCompatActivity(), View.OnClickListener {
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        if (isEdit){
+        if (isEdit) {
             menuInflater.inflate(R.menu.menu_form, menu)
         }
 
@@ -137,7 +133,7 @@ class NoteAddUpdateActivity : AppCompatActivity(), View.OnClickListener {
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        when(item.itemId){
+        when (item.itemId) {
             R.id.action_delete -> showAlertDialog(ALERT_DIALOG_DELETE)
             android.R.id.home -> showAlertDialog(ALERT_DIALOG_CLOSE)
         }
@@ -149,12 +145,12 @@ class NoteAddUpdateActivity : AppCompatActivity(), View.OnClickListener {
         showAlertDialog(ALERT_DIALOG_CLOSE)
     }
 
-    private fun showAlertDialog(type: Int){
+    private fun showAlertDialog(type: Int) {
         val isDialogClose = type == ALERT_DIALOG_CLOSE
         val dialogTitle: String
         val dialogMessage: String
 
-        if (isDialogClose){
+        if (isDialogClose) {
             dialogTitle = "Batal"
             dialogMessage = "Apakah anda ingin membatalkan perubahan pada form?"
         } else {
@@ -168,8 +164,8 @@ class NoteAddUpdateActivity : AppCompatActivity(), View.OnClickListener {
         alertDialogBuilder
             .setMessage(dialogMessage)
             .setCancelable(false)
-            .setPositiveButton("Ya"){ dialog, id ->
-                if(isDialogClose){
+            .setPositiveButton("Ya") { dialog, id ->
+                if (isDialogClose) {
                     finish()
                 } else {
                     // Gunakan uriWithId dari intent activity ini
@@ -179,7 +175,7 @@ class NoteAddUpdateActivity : AppCompatActivity(), View.OnClickListener {
                     finish()
                 }
             }
-            .setNegativeButton("Tidak"){dialog, id -> dialog.cancel() }
+            .setNegativeButton("Tidak") { dialog, id -> dialog.cancel() }
         val alertDialog = alertDialogBuilder.create()
         alertDialog.show()
     }

@@ -1,8 +1,8 @@
-package net.growdev.mynotesapp_kotlin.helper
+package net.growdev.consumerapp.helper
 
 import android.database.Cursor
-import net.growdev.mynotesapp_kotlin.db.DatabaseContract
-import net.growdev.mynotesapp_kotlin.entity.Note
+import net.growdev.consumerapp.db.DatabaseContract
+import net.growdev.consumerapp.entity.Note
 
 object MappingHelper {
 

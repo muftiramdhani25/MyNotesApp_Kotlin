@@ -1,4 +1,4 @@
-package net.growdev.mynotesapp_kotlin.db
+package net.growdev.consumerapp.db
 
 import android.net.Uri
 import android.provider.BaseColumns

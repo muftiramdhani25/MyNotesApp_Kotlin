@@ -1,8 +1,11 @@
 package net.growdev.mynotesapp_kotlin
 
 import android.content.Intent
+import android.database.ContentObserver
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.os.Handler
+import android.os.HandlerThread
 import android.os.Message
 import android.view.View
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -13,6 +16,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import net.growdev.mynotesapp_kotlin.adapter.NoteAdapter
+import net.growdev.mynotesapp_kotlin.db.DatabaseContract.NoteColumns.Companion.CONTENT_URI
 import net.growdev.mynotesapp_kotlin.db.NoteHelper
 import net.growdev.mynotesapp_kotlin.entity.Note
 import net.growdev.mynotesapp_kotlin.helper.MappingHelper
@@ -41,15 +45,23 @@ class MainActivity : AppCompatActivity() {
             startActivityForResult(intent, NoteAddUpdateActivity.REQUEST_ADD)
         }
 
-        noteHelper = NoteHelper.getInstance(applicationContext)
-        noteHelper.open()
+        val handlerThread = HandlerThread("DataObserver")
+        handlerThread.start()
+        val handler = Handler(handlerThread.looper)
 
-        if (savedInstanceState == null){
-            // proses ambil data
+        val myObserver = object : ContentObserver(handler) {
+            override fun onChange(self: Boolean) {
+                loadNotesAsync()
+            }
+        }
+
+        contentResolver.registerContentObserver(CONTENT_URI, true, myObserver)
+
+        if (savedInstanceState == null) {
             loadNotesAsync()
         } else {
             val list = savedInstanceState.getParcelableArrayList<Note>(EXTRA_STATE)
-            if (list != null){
+            if (list != null) {
                 adapter.listNotes = list
             }
         }
@@ -112,7 +124,7 @@ class MainActivity : AppCompatActivity() {
         GlobalScope.launch(Dispatchers.Main){
             progressbar.visibility = View.VISIBLE
             val deferredNotes = async(Dispatchers.IO){
-                val cursor = noteHelper.queryAll()
+                val cursor = contentResolver?.query(CONTENT_URI, null, null, null, null)
                 MappingHelper.mapCursorToArrayList(cursor)
             }
 
